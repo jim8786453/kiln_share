@@ -81,3 +81,41 @@ class TestKilnShare(TestMinimal):
         }
         r = self.post('api/kilns', data=kiln)
         self.assertEqual(r[1], 201)
+
+    def test_images(self):
+        r = self.get('api/users')
+        user = r[0]['_items'][0]
+
+        kiln = {
+            'name': 'Test kiln',
+            'user': user['_id'],
+            'location': {
+                'type': 'Point',
+                'coordinates': [ 10.321, 5.123 ]
+            },
+            'power': 'electric',
+            'chamber_size': 100,
+            'max_temperature': 1000,
+            'cost_per_fire': 10.50,
+            'description': 'foo bar'
+        }
+        r = self.post('api/kilns', data=kiln)
+        kiln = r[0]
+
+        # Create an image.
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        file_ = open(os.path.join(__location__, 'img.jpg'));
+        file_content = file_.read()
+        image = BytesIO(file_content)
+        data = {
+            'kiln': kiln['_id'],
+            'file': (image, 'img.jpg'),
+        }
+        r = self.test_client.post('api/images', data=data)
+        self.assertEqual(r.status_code, 201)
+
+        # Check we have an image.
+        r = self.get('api/images')
+        total = r[0]['_meta']['total']
+        self.assertEqual(total, 1)
