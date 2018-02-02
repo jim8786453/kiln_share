@@ -46,6 +46,9 @@ DOMAIN = {
         'item_methods': ['GET', 'PATCH', 'DELETE'],
         'item_title': 'Kilns',
         'description': 'Kilns to share',
+        'mongo_indexes': {
+            'index name': [('location', '2dsphere')],
+        },
         'schema': {
             'name': {
                 'type': 'string',
