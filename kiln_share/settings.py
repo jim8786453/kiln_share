@@ -11,7 +11,7 @@ logger = logs.get_logger(__name__)
 
 # Eve Database settings
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
-MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
+MONGO_PORT = int(os.environ.get('MONGO_PORT', 27017))
 MONGO_USERNAME = os.environ.get('MONGO_USERNAME', '')
 MONGO_PASSWORD = os.environ.get('MONGO_PASSWORD', '')
 MONGO_DBNAME = os.environ.get('MONGO_DBNAME', 'kiln_share')
@@ -36,7 +36,8 @@ DOMAIN = {
         'schema': {
             'auth0_id': {
                 'type': 'string',
-                'required': True
+                'required': True,
+                'unique': True,
             }
         }
     },
@@ -52,7 +53,7 @@ DOMAIN = {
             },
             'user': {
                 'type': 'objectid',
-                'required': False,
+                'required': True,
                 'data_relation': {
                     'resource': 'users',
                     'embeddable': True
@@ -60,9 +61,9 @@ DOMAIN = {
             },
             'location': {
                 'type': 'point',
-                'required': True,
+                'required': False,
             },
-            'type': {
+            'power': {
                 'type': 'string',
                 'allowed': [
                     'electric',
@@ -87,6 +88,10 @@ DOMAIN = {
             'cost_per_fire': {
                 'type': 'number',
                 'required': True
+            },
+            'description': {
+                'type': 'string',
+                'required': False
             }
         }
     },
