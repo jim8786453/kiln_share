@@ -1,0 +1,15 @@
+
+# Deployment
+
+Use Fabric to deploy a new OpenResty web server onto an Ubuntu 16.04
+server after completing the following new server guides:
+
+- https://www.linode.com/docs/getting-started
+- https://www.linode.com/docs/security/securing-your-server
+
+Add new environments into the STAGES dict in fabfile.py.
+
+On a fresh Ubuntu server the following should get the we bserver up
+and running:
+
+- `fab {{your_env}} install`
