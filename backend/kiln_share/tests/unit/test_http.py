@@ -119,3 +119,24 @@ class TestKilnShare(TestMinimal):
         r = self.get('api/images')
         total = r[0]['_meta']['total']
         self.assertEqual(total, 1)
+
+    def test_conversations(self):
+        user = {
+            'auth0_id': 'bar'
+        }
+        r = self.post('api/users', data=user)
+        r = self.get('api/users')
+        user_one = r[0]['_items'][0]
+        user_two = r[0]['_items'][1]
+        conversation = {
+            'participants': [
+                user_one['_id'],
+                user_two['_id']
+            ]
+        }
+        r = self.post('api/conversations', data=conversation)
+        self.assertEqual(r[1], 201)
+
+        url = 'api/conversations?where={"participants":"%s"}' % (user_one['_id'])
+        r = self.get(url)
+        self.assertEqual(len(r[0]['_items'][0]['participants']), 2)

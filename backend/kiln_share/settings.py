@@ -23,14 +23,14 @@ CACHE_EXPIRES = 0
 
 # Eve general settings
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-URL_PREFIX = 'api'
+URL_PREFIX = 'auth'
 VERSIONING = True
 ITEM_METHODS = []
 RESOURCE_METHODS = []
 DOMAIN = {
     'users': {
-        'resource_methods': ['GET', 'POST'],
-        'item_methods': ['GET', 'PATCH', 'DELETE'],
+        'resource_methods': [],
+        'item_methods': [],
         'item_title': 'Users',
         'description': 'Users of the Api',
         'schema': {
@@ -42,8 +42,8 @@ DOMAIN = {
         }
     },
     'kilns': {
-        'resource_methods': ['GET', 'POST'],
-        'item_methods': ['GET', 'PATCH', 'DELETE'],
+        'resource_methods': [],
+        'item_methods': [],
         'item_title': 'Kilns',
         'description': 'Kilns to share',
         'mongo_indexes': {
@@ -99,8 +99,8 @@ DOMAIN = {
         }
     },
     'images': {
-        'resource_methods': ['GET', 'POST'],
-        'item_methods': ['GET', 'DELETE'],
+        'resource_methods': [],
+        'item_methods': [],
         'item_title': 'Images',
         'description': 'Images of kilns',
         'schema': {
@@ -120,22 +120,25 @@ DOMAIN = {
     },
     'conversations': {
         'resource_methods': ['GET', 'POST'],
-        'item_methods': ['GET', 'PATCH', 'DELETE'],
+        'item_methods': ['GET'],
         'item_title': 'Conversations',
         'description': 'Conversations between users',
         'schema': {
             'participants': {
                 'type': 'list',
-                'required': False,
-                'data_relation': {
-                    'resource': 'users'
+                'schema': {
+                    'type': 'objectid',
+                    'data_relation': {
+                        'resource': 'users',
+                        'embeddable': True,
+                    }
                 }
             }
         }
     },
     'messages': {
-        'resource_methods': ['GET', 'POST'],
-        'item_methods': ['GET', 'PATCH', 'DELETE'],
+        'resource_methods': ['POST'],
+        'item_methods': [],
         'item_title': 'Messages',
         'description': 'Message component of a conversation',
         'schema': {
@@ -143,7 +146,8 @@ DOMAIN = {
                 'type': 'objectid',
                 'required': False,
                 'data_relation': {
-                    'resource': 'conversations'
+                    'resource': 'conversations',
+                    'embedding': True
                 }
             },
             'from': {
