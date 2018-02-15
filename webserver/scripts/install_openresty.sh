@@ -10,7 +10,7 @@ apt-get install -y libjson0 libjson0-dev
 ./configure -j2 \
 --with-luajit \
 --with-pcre-jit \
---with-ipv6 \
+--with-ipv6
 
 make -j2
 make install

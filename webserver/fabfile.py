@@ -90,21 +90,39 @@ def install():
     """
     stage_require()
 
-    run('mkdir -p /home/%s/deploy' % env.user)
-    run('mkdir -p /home/%s/deploy/bin' % env.user)
-    run('mkdir -p /home/%s/deploy/bin/nginx-jwt' % env.user)
-    run('mkdir -p /home/%s/deploy/config' % env.user)
-    run('mkdir -p /home/%s/deploy/downloads' % env.user)
-    run('mkdir -p /home/%s/deploy/scripts' % env.user)
-    run('mkdir -p /home/%s/deploy/www' % env.user)
+    remove()
+    setup_dirs()
 
     install_openresty()
     install_lua()
     install_nginxjwt()
-    configure_openresty()
+    install_modules()
+
     configure_firewall()
     configure_certs()
+    configure_openresty()
+
     restart()
+
+
+@task
+def remove():
+    stage_require()
+
+    sudo('rm -Rf /home/%s/deploy' % env.user)
+    sudo('rm -Rf /usr/local/openresty/')
+
+
+@task
+def setup_dirs():
+    stage_require()
+
+    run('mkdir -p /home/%s/deploy' % env.user)
+    run('mkdir -p /home/%s/deploy/bin' % env.user)
+    run('mkdir -p /home/%s/deploy/config' % env.user)
+    run('mkdir -p /home/%s/deploy/downloads' % env.user)
+    run('mkdir -p /home/%s/deploy/scripts' % env.user)
+    run('mkdir -p /home/%s/deploy/www' % env.user)
 
 
 @task
@@ -137,50 +155,28 @@ def install_lua():
 
 @task
 def install_nginxjwt():
-    """Install and configure Auth0/Openresty integration.
+    """Install and configure Lua and dependencies.
 
     """
     stage_require()
-    put('scripts/install_nginxjwt.sh',
+    upload_template(
+        'scripts/install_nginxjwt.sh',
         '/home/%s/deploy/scripts/install_nginxjwt.sh' % env.user,
-        mode=0755)
+        context=env,
+        use_jinja=True,
+        mode=0755,
+        backup=False)
     sudo('/home/%s/deploy/scripts/install_nginxjwt.sh' % env.user)
 
 
 @task
-def configure_openresty():
-    """Upload Openresty configuration files.
-
-    - Make logging directories
-    - Configure systemctl
+def install_modules():
+    """
 
     """
     stage_require()
-    sudo('mkdir -p /var/log/openresty')
-    sudo('mkdir -p /usr/local/openresty/nginx/sites')
-    upload_template(
-        'templates/openresty.service',
-        '/etc/systemd/system/openresty.service',
-        context=env,
-        use_jinja=True,
-        use_sudo=True,
-        backup=False)
-    upload_template(
-        'templates/nginx.conf',
-        '/usr/local/openresty/nginx/conf/nginx.conf',
-        context=env,
-        use_jinja=True,
-        use_sudo=True,
-        backup=False)
-    upload_template(
-        'templates/default.conf',
-        '/usr/local/openresty/nginx/sites/default.conf',
-        context=env,
-        use_jinja=True,
-        use_sudo=True,
-        backup=False)
-    sudo('sudo systemctl daemon-reload')
-    sudo('sudo systemctl enable openresty')
+    put('modules/kiln_share.lua', '/home/%s/deploy/bin/kiln_share.lua'
+        % env.user, use_sudo=True)
 
 
 @task
@@ -220,6 +216,42 @@ def configure_certs():
     sudo('cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/letsencrypt/live/local.kilnshare.co.uk/fullchain.pem')
     sudo('cp /etc/ssl/private/ssl-cert-snakeoil.key /etc/letsencrypt/live/local.kilnshare.co.uk/privkey.pem')
     sudo('openssl dhparam -out ~/deploy/dhparams.pem 2048')
+
+
+@task
+def configure_openresty():
+    """Upload Openresty configuration files.
+
+    - Make logging directories
+    - Configure systemctl
+
+    """
+    stage_require()
+    sudo('mkdir -p /var/log/openresty')
+    sudo('mkdir -p /usr/local/openresty/nginx/sites')
+    upload_template(
+        'templates/openresty.service',
+        '/etc/systemd/system/openresty.service',
+        context=env,
+        use_jinja=True,
+        use_sudo=True,
+        backup=False)
+    upload_template(
+        'templates/nginx.conf',
+        '/usr/local/openresty/nginx/conf/nginx.conf',
+        context=env,
+        use_jinja=True,
+        use_sudo=True,
+        backup=False)
+    upload_template(
+        'templates/default.conf',
+        '/usr/local/openresty/nginx/sites/default.conf',
+        context=env,
+        use_jinja=True,
+        use_sudo=True,
+        backup=False)
+    sudo('sudo systemctl daemon-reload')
+    sudo('sudo systemctl enable openresty')
 
 
 @task

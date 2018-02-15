@@ -24,7 +24,7 @@ ExecReload=/usr/local/openresty/bin/openresty -g 'daemon on; master_process on;'
 ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/openresty.pid
 TimeoutStopSec=5
 KillMode=mixed
-Environment=JWT_SECRET="{{jwt_secret}}"
+Environment=JWT_SECRET={{jwt_secret}}
 
 [Install]
 WantedBy=multi-user.target

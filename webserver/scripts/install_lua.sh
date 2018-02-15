@@ -13,9 +13,5 @@ cd luarocks-2.0.13/
     --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1
 make
 make install
-/usr/local/openresty/luajit/bin/luarocks install lua-sec OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
-/usr/local/openresty/luajit/bin/luarocks install penlight OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
-/usr/local/openresty/luajit/bin/luarocks install lua-requests OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
-/usr/local/openresty/luajit/bin/luarocks install lua-resty-template OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
-/usr/local/openresty/luajit/bin/luarocks install lua-resty-session OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
 /usr/local/openresty/luajit/bin/luarocks install lua-cjson OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
+/usr/local/openresty/luajit/bin/luarocks install lua-resty-session OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
