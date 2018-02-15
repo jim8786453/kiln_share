@@ -9,7 +9,7 @@ server after completing the following new server guides:
 
 Add new environments into the STAGES dict in fabfile.py.
 
-On a fresh Ubuntu server the following should get the we bserver up
+On a fresh Ubuntu server the following should get the webserver up
 and running:
 
 - `fab {{your_env}} install`
