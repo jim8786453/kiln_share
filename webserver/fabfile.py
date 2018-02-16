@@ -85,30 +85,41 @@ def check_sudo():
 
 @task
 def install():
-    """Install webserver and requirements and the Python backend.
+    """Install all kilnshare.co.uk webserver components.
 
     """
     stage_require()
-
     remove()
     setup_dirs()
-
     install_openresty()
     install_lua()
     install_nginxjwt()
     install_modules()
-
     configure_firewall()
     configure_certs()
     configure_openresty()
+    restart()
 
+
+@task
+def install_light():
+    """Install everything except OpenResty and Lua.
+
+    """
+    stage_require()
+    remove()
+    setup_dirs()
+    install_nginxjwt()
+    install_modules()
+    configure_firewall()
+    configure_certs()
+    configure_openresty()
     restart()
 
 
 @task
 def remove():
     stage_require()
-
     sudo('rm -Rf /home/%s/deploy' % env.user)
     sudo('rm -Rf /usr/local/openresty/')
 
@@ -116,7 +127,6 @@ def remove():
 @task
 def setup_dirs():
     stage_require()
-
     run('mkdir -p /home/%s/deploy' % env.user)
     run('mkdir -p /home/%s/deploy/bin' % env.user)
     run('mkdir -p /home/%s/deploy/config' % env.user)
