@@ -100,3 +100,6 @@ devenv/
 
 # mypy
 .mypy_cache/
+
+# vagrant
+.vagrant
