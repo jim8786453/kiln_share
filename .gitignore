@@ -103,3 +103,5 @@ devenv/
 
 # vagrant
 .vagrant
+
+.mytox/
