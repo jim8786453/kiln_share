@@ -12,7 +12,7 @@ del os.link
 
 setup(
     author='Jim Kennedy',
-    author_email='jim8786453@gmail.com',
+    author_email='jim@kohlstudios.co.uk',
     description='Api for kilnshare.co.uk',
     install_requires=reqs,
     name='kiln_share',

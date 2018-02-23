@@ -6,7 +6,7 @@ sudo letsencrypt certonly \
      --webroot \
      --webroot-path /home/{{user}}/deploy/www \
      --renew-by-default \
-     --email jim8786453@gmail.com \
+     --email jim@kohlstudios.co.uk \
      --text \
      --agree-tos \
      -d {{server_name}}
