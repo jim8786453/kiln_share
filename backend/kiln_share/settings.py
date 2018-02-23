@@ -17,33 +17,43 @@ MONGO_PASSWORD = os.environ.get('MONGO_PASSWORD', '')
 MONGO_DBNAME = os.environ.get('MONGO_DBNAME', 'kiln_share')
 MONGO_QUERY_BLACKLIST = ['$where']
 
+
 # Eve cache settings
 CACHE_CONTROL = 'no-cache'
 CACHE_EXPIRES = 0
 
+
 # Eve general settings
+AUTH_FIELD = "auth0_id"
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-URL_PREFIX = 'auth'
-VERSIONING = True
 ITEM_METHODS = []
+PAGINATION_DEFAULT = 10
 RESOURCE_METHODS = []
+VERSIONING = True
+XML = False
+X_DOMAINS = ['*']
+X_HEADERS = ['Content-type', 'If-Match']
+
+
+# Eve change logging
+OPLOG = True
+OPLOG_ENDPOINT = 'history'
+OPLOG_RETURN_EXTRA_FIELD = True
+
+
+# Eve media and image settings
+EXTENDED_MEDIA_INFO = ['content_type', 'name', 'length']
+MEDIA_ENDPOINT = 'media'
+RETURN_MEDIA_AS_BASE64_STRING = False
+RETURN_MEDIA_AS_URL = True
+
+
+# Schema
 DOMAIN = {
-    'users': {
-        'resource_methods': [],
-        'item_methods': [],
-        'item_title': 'Users',
-        'description': 'Users of the Api',
-        'schema': {
-            'auth0_id': {
-                'type': 'string',
-                'required': True,
-                'unique': True,
-            }
-        }
-    },
     'kilns': {
-        'resource_methods': [],
-        'item_methods': [],
+        'url': 'auth/kilns',
+        'resource_methods': ['GET', 'POST'],
+        'item_methods': ['GET', 'PATCH', 'DELETE'],
         'item_title': 'Kilns',
         'description': 'Kilns to share',
         'mongo_indexes': {
@@ -53,14 +63,6 @@ DOMAIN = {
             'name': {
                 'type': 'string',
                 'required': True,
-            },
-            'user': {
-                'type': 'objectid',
-                'required': True,
-                'data_relation': {
-                    'resource': 'users',
-                    'embeddable': True
-                }
             },
             'location': {
                 'type': 'point',
@@ -99,8 +101,9 @@ DOMAIN = {
         }
     },
     'images': {
-        'resource_methods': [],
-        'item_methods': [],
+        'url': 'auth/kilns/<regex("(?s).*"):kiln>/images',
+        'resource_methods': ['GET', 'POST'],
+        'item_methods': ['GET', 'DELETE'],
         'item_title': 'Images',
         'description': 'Images of kilns',
         'schema': {
@@ -117,65 +120,5 @@ DOMAIN = {
                 'required': True
             }
         }
-    },
-    'conversations': {
-        'resource_methods': ['GET', 'POST'],
-        'item_methods': ['GET'],
-        'item_title': 'Conversations',
-        'description': 'Conversations between users',
-        'schema': {
-            'participants': {
-                'type': 'list',
-                'schema': {
-                    'type': 'objectid',
-                    'data_relation': {
-                        'resource': 'users',
-                        'embeddable': True,
-                    }
-                }
-            }
-        }
-    },
-    'messages': {
-        'resource_methods': ['POST'],
-        'item_methods': [],
-        'item_title': 'Messages',
-        'description': 'Message component of a conversation',
-        'schema': {
-            'conversation': {
-                'type': 'objectid',
-                'required': False,
-                'data_relation': {
-                    'resource': 'conversations',
-                    'embedding': True
-                }
-            },
-            'from': {
-                'type': 'objectid',
-                'required': False,
-                'data_relation': {
-                    'resource': 'users'
-                }
-            },
-            'timestamp': {
-                'type': 'datetime',
-                'required': True
-            }
-        }
     }
 }
-X_DOMAINS = ['*']
-X_HEADERS = ['Content-type', 'If-Match']
-XML = False
-PAGINATION_DEFAULT = 10
-
-# Eve change logging
-OPLOG = True
-OPLOG_ENDPOINT = 'history'
-OPLOG_RETURN_EXTRA_FIELD = True
-
-# Eve media and image settings
-EXTENDED_MEDIA_INFO = ['content_type', 'name', 'length']
-RETURN_MEDIA_AS_BASE64_STRING = False
-RETURN_MEDIA_AS_URL = True
-MEDIA_ENDPOINT = 'media'
