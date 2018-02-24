@@ -289,3 +289,12 @@ def restart():
     """
     stage_require()
     sudo('systemctl restart openresty')
+
+
+@task
+def restart_mongo():
+    """Restart the Mongodb
+
+    """
+    stage_require()
+    sudo('service mongod restart')
