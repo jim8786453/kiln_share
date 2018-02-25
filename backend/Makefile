@@ -16,7 +16,7 @@ clean-build: ## Clean Python build directories
 
 clean: clean-pyc clean-build ## Clean all Python auto-generated files and virtual environments
 	rm --force --recursive devenv
-	rm --force --recursive ~/.mytox
+	rm --force --recursive .mytox
 
 devenv: ## Build a Python virtual environment
 	tox -e devenv
