@@ -133,6 +133,7 @@ def setup_dirs():
     run('mkdir -p /home/%s/deploy/downloads' % env.user)
     run('mkdir -p /home/%s/deploy/scripts' % env.user)
     run('mkdir -p /home/%s/deploy/www' % env.user)
+    run('mkdir -p /home/%s/deploy/www/swagger-ui' % env.user)
 
 
 @task
@@ -186,6 +187,16 @@ def install_modules():
     """
     stage_require()
     put('modules/kiln_share.lua', '/home/%s/deploy/bin/kiln_share.lua'
+        % env.user, use_sudo=True)
+
+
+@task
+def install_swaggerui():
+    """
+
+    """
+    stage_require()
+    put('swagger-ui', '/home/%s/deploy/www'
         % env.user, use_sudo=True)
 
 
