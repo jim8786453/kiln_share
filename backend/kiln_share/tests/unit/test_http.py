@@ -46,6 +46,7 @@ class TestKilnShare(TestMinimal):
     def test_multi_tenancy(self):
         kiln = {
             'name': 'Test kiln',
+            'share_type': 'any',
             'location': {
                 'type': 'Point',
                 'coordinates': [ 10.321, 5.123 ]
@@ -76,6 +77,7 @@ class TestKilnShare(TestMinimal):
         headers = deepcopy(self.user1)
         kiln = {
             'name': 'Test kiln',
+            'share_type': 'any',
             'location': {
                 'type': 'Point',
                 'coordinates': [ 10.321, 5.123 ]
@@ -89,7 +91,6 @@ class TestKilnShare(TestMinimal):
 
         r = self.post('auth/kilns', headers=headers, data=kiln)
         kiln_id = r[0]['_id']
-        url = 'auth/kilns/%s/images' % kiln_id
 
         # Post an image.
         headers = deepcopy(self.user1)
@@ -98,8 +99,11 @@ class TestKilnShare(TestMinimal):
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
         file_ = open(os.path.join(location, 'img.jpg'));
         file_content = file_.read()
-        data = {'file': (BytesIO(file_content), 'img.png')}
+        data = {
+            'file': (BytesIO(file_content), 'img.png'),
+            'kiln': kiln_id
+        }
 
         # Use test client directly to avoid json encoding.
-        r = self.test_client.post(url, data=data, headers=headers)
+        r = self.test_client.post('auth/images', data=data, headers=headers)
         self.assertEqual(r.status_code, 201)

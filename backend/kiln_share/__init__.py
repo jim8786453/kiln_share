@@ -54,7 +54,7 @@ def create_app():
               media=GridFSImageStorage)
 
     # Register Swagger extension.
-    app.register_blueprint(swagger)
+    app.register_blueprint(swagger, url_prefix='/auth')
     app.config['SWAGGER_INFO'] = {
         'title': 'Kiln Share',
         'version': '0.0.1',
@@ -62,6 +62,7 @@ def create_app():
         'contact': {
             'name': 'jim@kohlstudios.co.uk',
         },
+        'schemes': ['https'],
     }
 
     return app

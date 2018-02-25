@@ -112,7 +112,7 @@ DOMAIN = {
         }
     },
     'images': {
-        'url': 'auth/kilns/<regex("(?s).*"):kiln>/images',
+        'url': 'auth/images',
         'resource_methods': ['GET', 'POST'],
         'item_methods': ['GET', 'DELETE'],
         'item_title': 'Images',
