@@ -64,6 +64,17 @@ DOMAIN = {
                 'type': 'string',
                 'required': True,
             },
+            'type': {
+                'type': 'string',
+                'required': True,
+                'allowed': [
+                    'solo',
+                    'colo',
+                    'firing_only',
+                    'any'
+                ],
+                'default': 'any'
+            },
             'location': {
                 'type': 'point',
                 'required': False,
