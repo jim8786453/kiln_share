@@ -25,7 +25,7 @@ CACHE_EXPIRES = 0
 
 # Eve general settings
 AUTH_FIELD = "auth0_id"
-DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ITEM_METHODS = []
 PAGINATION_DEFAULT = 10
 RESOURCE_METHODS = []
@@ -37,7 +37,7 @@ X_HEADERS = ['Content-type', 'If-Match']
 
 # Eve change logging
 OPLOG = True
-OPLOG_ENDPOINT = 'history'
+OPLOG_ENDPOINT = 'auth/history'
 OPLOG_RETURN_EXTRA_FIELD = True
 
 
@@ -64,7 +64,7 @@ DOMAIN = {
                 'type': 'string',
                 'required': True,
             },
-            'type': {
+            'share_type': {
                 'type': 'string',
                 'required': True,
                 'allowed': [
@@ -79,6 +79,10 @@ DOMAIN = {
                 'type': 'point',
                 'required': False,
             },
+            'cost_per_fire': {
+                'type': 'number',
+                'required': True
+            },
             'power': {
                 'type': 'string',
                 'allowed': [
@@ -89,7 +93,7 @@ DOMAIN = {
                 'default': 'electric',
                 'required': True
             },
-            'other_type': {
+            'power_other': {
                 'type': 'string',
                 'required': False
             },
@@ -100,10 +104,6 @@ DOMAIN = {
             'max_temperature': {
                 'type': 'number',
                 'required': False
-            },
-            'cost_per_fire': {
-                'type': 'number',
-                'required': True
             },
             'description': {
                 'type': 'string',
@@ -131,5 +131,5 @@ DOMAIN = {
                 'required': True
             }
         }
-    }
+    },
 }
