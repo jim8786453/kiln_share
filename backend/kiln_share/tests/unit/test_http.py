@@ -57,24 +57,26 @@ class TestKilnShare(TestMinimal):
             'cost_per_fire': 10.50,
             'description': 'foo bar'
         }
-        r = self.post('auth/kilns', headers=self.user1, data=kiln)
+        headers1 = deepcopy(self.user1)
+        r = self.post('auth/kilns', headers=headers1, data=kiln)
         self.assertEqual(r[1], 201)
 
-        r = self.get('auth/kilns', headers=self.user1)
+        r = self.get('auth/kilns', headers=headers1)
         self.assertEqual(r[1], 200)
 
         result = r[0]
         self.assertEqual(result['_meta']['total'], 1)
 
         # Now with another user.
-        r = self.get('auth/kilns', headers=self.user2)
+        headers2 = deepcopy(self.user2)
+        r = self.get('auth/kilns', headers=headers2)
         self.assertEqual(r[1], 200)
 
         result = r[0]
         self.assertEqual(result['_meta']['total'], 0)
 
     def test_images(self):
-        headers = deepcopy(self.user1)
+        headers1 = deepcopy(self.user1)
         kiln = {
             'name': 'Test kiln',
             'share_type': 'any',
@@ -89,12 +91,12 @@ class TestKilnShare(TestMinimal):
             'description': 'foo bar'
         }
 
-        r = self.post('auth/kilns', headers=headers, data=kiln)
+        r = self.post('auth/kilns', headers=headers1, data=kiln)
         kiln_id = r[0]['_id']
 
         # Post an image.
-        headers = deepcopy(self.user1)
-        headers.append(('Content-Type', 'multipart/form-data'))
+        headers1 = deepcopy(self.user1)
+        headers1.append(('Content-Type', 'multipart/form-data'))
         location = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
         file_ = open(os.path.join(location, 'img.jpg'));
@@ -105,5 +107,59 @@ class TestKilnShare(TestMinimal):
         }
 
         # Use test client directly to avoid json encoding.
-        r = self.test_client.post('auth/images', data=data, headers=headers)
+        r = self.test_client.post('auth/images', data=data, headers=headers1)
         self.assertEqual(r.status_code, 201)
+
+    def test_conversations_and_messages(self):
+        headers1 = deepcopy(self.user1)
+        headers2 = deepcopy(self.user2)
+        headers3 = [('X-Kiln-Share-Id', 'baz')]
+
+        # Check no data exists.
+        for headers in [headers1, headers2, headers3]:
+            r = self.get('auth/conversations', headers=headers)
+            self.assertEqual(r[1], 200)
+            result = r[0]
+            self.assertEqual(result['_meta']['total'], 0)
+
+        # Create a conversation.
+        data = {
+            'participants': ['bar']
+        }
+        r = self.post('auth/conversations', data=data, headers=headers1)
+        self.assertEqual(r[1], 201)
+        conversation_id = r[0]['_id']
+
+        # Both users should see the conversation.
+        for headers in [headers1, headers2]:
+            r = self.get('auth/conversations', headers=headers)
+            self.assertEqual(r[1], 200)
+            result = r[0]
+            self.assertEqual(result['_meta']['total'], 1)
+
+        # But user 3 should not.
+        r = self.get('auth/conversations', headers=headers3)
+        self.assertEqual(r[1], 200)
+        result = r[0]
+        self.assertEqual(result['_meta']['total'], 0)
+
+        # Now send a message.
+        data = {
+            'text': 'hello'
+        }
+        url = 'auth/conversations/%s/messages' % conversation_id
+        r = self.post(url, data=data, headers=deepcopy(self.user1))
+        self.assertEqual(r[1], 201)
+
+        # User 3 shouldn't be able to post to the conversation.
+        r = self.post(url, data=data, headers=headers3)
+        self.assertEqual(r[1], 403)
+
+        # Both users should see the message when fetching the
+        # conversation.
+        for headers in [headers1, headers2]:
+            url = 'auth/conversations/%s' % conversation_id
+            r = self.get(url, headers=headers)
+            self.assertEqual(r[1], 200)
+            result = r[0]
+            self.assertEqual(len(result['messages']), 1)

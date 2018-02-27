@@ -133,4 +133,47 @@ DOMAIN = {
             }
         }
     },
+    'conversations': {
+        'auth_field': 'participants',
+        'url': 'auth/conversations',
+        'resource_methods': ['GET', 'POST'],
+        'item_methods': ['GET'],
+        'item_title': 'Conversations',
+        'description': 'Conversations between users',
+        'schema': {
+            'participants': {
+                'type': 'list',
+                'required': True,
+                'schema': {
+                    'type': 'string'
+                }
+            },
+        }
+    },
+    'messages': {
+        'auth_field': 'from',
+        'url': 'auth/conversations/<regex("(?s).*"):conversation>/messages',
+        'resource_methods': ['POST'],
+        'item_methods': [],
+        'item_title': 'Messages',
+        'description': 'Messages between users',
+        'schema': {
+            'conversation': {
+                'type': 'objectid',
+                'required': True,
+                'data_relation': {
+                    'resource': 'conversations',
+                    'embeddable': True
+                },
+            },
+            'from': {
+                'type': 'string',
+                'required': False
+            },
+            'text': {
+                'type': 'string',
+                'required': False
+            },
+        }
+    },
 }
