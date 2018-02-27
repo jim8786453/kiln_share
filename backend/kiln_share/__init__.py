@@ -25,10 +25,8 @@ class Auth(TokenAuth):
     """
 
     def authorized(self, allowed_roles, resource, method):
-        """ Validates the the current request is allowed to pass through.
-        :param allowed_roles: allowed roles for the current request, can be a
-                              string or a list of roles.
-        :param resource: resource being requested.
+        """Validates the the current request is allowed to pass through.
+
         """
         auth = None
         if 'X-Kiln-Share-Id' in request.headers:
