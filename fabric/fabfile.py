@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 
-from fabric.api import run, local, env, settings, cd, task, put, execute
+from fabric.api import run, local as local_, env, settings, cd, task, put, execute
 from fabric.contrib.files import exists, upload_template
 from fabric.operations import _prefix_commands, _prefix_env_vars, require, sudo
 
 
 env.use_ssh_config = True
-
 
 LOCAL_HOST = os.environ.get('LOCAL_HOST')
 LOCAL_USER = os.environ.get('LOCAL_USER')
@@ -95,22 +94,8 @@ def install():
     install_lua()
     install_nginxjwt()
     install_modules()
-    configure_firewall()
-    configure_certs()
-    configure_openresty()
-    restart()
-
-
-@task
-def install_light():
-    """Install everything except OpenResty and Lua.
-
-    """
-    stage_require()
-    remove()
-    setup_dirs()
-    install_nginxjwt()
-    install_modules()
+    install_swaggerui()
+    install_mithril()
     configure_firewall()
     configure_certs()
     configure_openresty()
@@ -133,7 +118,7 @@ def setup_dirs():
     run('mkdir -p /home/%s/deploy/downloads' % env.user)
     run('mkdir -p /home/%s/deploy/scripts' % env.user)
     run('mkdir -p /home/%s/deploy/www' % env.user)
-    run('mkdir -p /home/%s/deploy/www/swagger-ui' % env.user)
+    run('mkdir -p /home/%s/deploy/swagger-ui' % env.user)
 
 
 @task
@@ -142,7 +127,7 @@ def install_openresty():
 
     """
     stage_require()
-    put('scripts/install_openresty.sh',
+    put('../webserver/scripts/install_openresty.sh',
         '/home/%s/deploy/scripts/install_openresty.sh' % env.user,
         mode=0755)
     sudo('/home/%s/deploy/scripts/install_openresty.sh' % env.user)
@@ -154,13 +139,15 @@ def install_lua():
 
     """
     stage_require()
+    template_dir = os.path.join(os.path.dirname(__file__), '../webserver')
     upload_template(
         'scripts/install_lua.sh',
         '/home/%s/deploy/scripts/install_lua.sh' % env.user,
         context=env,
         use_jinja=True,
         mode=0755,
-        backup=False)
+        backup=False,
+        template_dir=template_dir)
     sudo('/home/%s/deploy/scripts/install_lua.sh' % env.user)
 
 
@@ -170,13 +157,15 @@ def install_nginxjwt():
 
     """
     stage_require()
+    template_dir = os.path.join(os.path.dirname(__file__), '../webserver')
     upload_template(
         'scripts/install_nginxjwt.sh',
         '/home/%s/deploy/scripts/install_nginxjwt.sh' % env.user,
         context=env,
         use_jinja=True,
         mode=0755,
-        backup=False)
+        backup=False,
+        template_dir=template_dir)
     sudo('/home/%s/deploy/scripts/install_nginxjwt.sh' % env.user)
 
 
@@ -186,7 +175,7 @@ def install_modules():
 
     """
     stage_require()
-    put('modules/kiln_share.lua', '/home/%s/deploy/bin/kiln_share.lua'
+    put('../webserver/modules/kiln_share.lua', '/home/%s/deploy/bin/kiln_share.lua'
         % env.user, use_sudo=True)
 
 
@@ -196,7 +185,7 @@ def install_swaggerui():
 
     """
     stage_require()
-    put('swagger-ui', '/home/%s/deploy/www'
+    put('../swagger-ui', '/home/%s/deploy/'
         % env.user, use_sudo=True)
 
 
@@ -220,13 +209,15 @@ def configure_certs():
     stage_require()
 
     if not env.stage == 'local':
+        template_dir = os.path.join(os.path.dirname(__file__), '../webserver')
         upload_template(
             'templates/letsencrypt.sh',
             '/home/%s/deploy/scripts/letsencrypt.sh' % env.user,
             context=env,
             use_jinja=True,
             mode=0755,
-            backup=False)
+            backup=False,
+            template_dir = template_dir)
 
         sudo('/home/%s/deploy/scripts/letsencrypt.sh' % env.user)
         return
@@ -250,27 +241,31 @@ def configure_openresty():
     stage_require()
     sudo('mkdir -p /var/log/openresty')
     sudo('mkdir -p /usr/local/openresty/nginx/sites')
+    template_dir = os.path.join(os.path.dirname(__file__), '../webserver')
     upload_template(
         'templates/openresty.service',
         '/etc/systemd/system/openresty.service',
         context=env,
         use_jinja=True,
         use_sudo=True,
-        backup=False)
+        backup=False,
+        template_dir=template_dir)
     upload_template(
         'templates/nginx.conf',
         '/usr/local/openresty/nginx/conf/nginx.conf',
         context=env,
         use_jinja=True,
         use_sudo=True,
-        backup=False)
+        backup=False,
+        template_dir=template_dir)
     upload_template(
         'templates/default.conf',
         '/usr/local/openresty/nginx/sites/default.conf',
         context=env,
         use_jinja=True,
         use_sudo=True,
-        backup=False)
+        backup=False,
+        template_dir=template_dir)
     sudo('sudo systemctl daemon-reload')
     sudo('sudo systemctl enable openresty')
 
@@ -309,3 +304,27 @@ def restart_mongo():
     """
     stage_require()
     sudo('service mongod restart')
+
+
+@task
+def install_gui():
+    """
+
+    """
+    stage_require()
+    local_('cd ../gui && npm run build')
+    put('../gui/dist/*', '/home/%s/deploy/www/'
+        % env.user, use_sudo=True)
+
+
+@task
+def install_api():
+    """
+
+    """
+    # Put the code from ../api into a dir
+    # Create venv
+    # Install dependencies
+    # Create OS service (with appropriate env)
+    # Start OS service
+    pass
