@@ -1,11 +1,17 @@
-# kiln_share
+# Kiln Share
 
 Repo for kilnshare.co.uk web app
 
 ## Project structure
 
-- backend is a Python Eve based API
+- /api Python Eve based API
 
-- vagrant is used to build a development environment
+- /fabric Set of deployment and config managament tools
 
-- webserver is an OpenResty proxy app with Auth0 integration
+- /gui Mithril.js app
+
+- /swagger-ui Swagger API docs ui
+
+- /vagrant Development environment provisioning
+
+- /webserver OpenResty based proxy with Auth0 integration
