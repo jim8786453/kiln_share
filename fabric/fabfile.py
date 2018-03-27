@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 
-from fabric.api import run, local as local_, env, settings, cd, task, put, execute
+from fabric.api import run, env, settings, cd, task, put, execute
 from fabric.contrib.files import exists, upload_template
-from fabric.operations import _prefix_commands, _prefix_env_vars, require, sudo
+from fabric.operations import _prefix_commands, _prefix_env_vars, require, sudo, local as local_
 
 
 env.use_ssh_config = True
@@ -113,6 +113,7 @@ def remove():
 def setup_dirs():
     stage_require()
     run('mkdir -p /home/%s/deploy' % env.user)
+    run('mkdir -p /home/%s/deploy/api' % env.user)
     run('mkdir -p /home/%s/deploy/bin' % env.user)
     run('mkdir -p /home/%s/deploy/config' % env.user)
     run('mkdir -p /home/%s/deploy/downloads' % env.user)
@@ -319,12 +320,30 @@ def install_gui():
 
 @task
 def install_api():
-    """
+    """Create a new virtualenv and install the Eve app.
 
     """
-    # Put the code from ../api into a dir
-    # Create venv
-    # Install dependencies
-    # Create OS service (with appropriate env)
-    # Start OS service
-    pass
+    sudo('pkill -9 gunicorn')
+    local_('cd ../api && python setup.py sdist --formats=gztar', capture=False)
+    dist = local_('cd ../api && python setup.py --fullname', capture=True).strip()
+    filename = '%s.tar.gz' % dist
+    put('../api/dist/%s' % filename, '/tmp/%s' % filename)
+    sudo('virtualenv /home/%s/deploy/api' % env.user)
+    sudo('/home/%s/deploy/api/bin/pip install gunicorn' % (env.user))
+    sudo('/home/%s/deploy/api/bin/pip install /tmp/%s' % (env.user, filename))
+
+
+@task
+def start_api():
+    """Run the Python api using Gunicorn.
+
+    """
+    sudo('. /home/%s/deploy/api/bin/activate && gunicorn --daemon -b 0.0.0.0:8080 kiln_share:app' % (env.user))
+
+
+@task
+def stop_api():
+    """Run the Python api using Gunicorn.
+
+    """
+    sudo('pkill -9 gunicorn')
