@@ -99,7 +99,7 @@ def install():
     configure_firewall()
     configure_certs()
     configure_openresty()
-    restart()
+    restart_server()
 
 
 @task
@@ -272,7 +272,7 @@ def configure_openresty():
 
 
 @task
-def start():
+def start_server():
     """Start Openresty webserver.
 
     """
@@ -281,7 +281,7 @@ def start():
 
 
 @task
-def stop():
+def stop_server():
     """Stop Openresty webserver.
 
     """
@@ -290,7 +290,7 @@ def stop():
 
 
 @task
-def restart():
+def restart_server():
     """Restart Openresty webserver.
 
     """
@@ -299,8 +299,8 @@ def restart():
 
 
 @task
-def restart_mongo():
-    """Restart the Mongodb
+def start_mongo():
+    """Start Mongodb
 
     """
     stage_require()
@@ -308,14 +308,12 @@ def restart_mongo():
 
 
 @task
-def install_gui():
-    """
+def restart_mongo():
+    """Restart Mongodb
 
     """
     stage_require()
-    local_('cd ../gui && npm run build')
-    put('../gui/dist/*', '/home/%s/deploy/www/'
-        % env.user, use_sudo=True)
+    sudo('service mongod restart')
 
 
 @task
@@ -347,3 +345,14 @@ def stop_api():
 
     """
     sudo('pkill -9 gunicorn')
+
+
+@task
+def install_gui():
+    """Build using node and copy the result.
+
+    """
+    stage_require()
+    local_('cd ../gui && npm run build')
+    put('../gui/dist/*', '/home/%s/deploy/www/'
+        % env.user, use_sudo=True)
